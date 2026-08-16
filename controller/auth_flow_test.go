@@ -46,7 +46,6 @@ func (*authFlowTestOAuthProvider) IsUserIDTaken(string) bool                    
 func (*authFlowTestOAuthProvider) FillUserByProviderID(*model.User, string) error { return nil }
 func (*authFlowTestOAuthProvider) SetProviderUserID(*model.User, string)          {}
 func (*authFlowTestOAuthProvider) GetProviderPrefix() string                      { return "flow_" }
-func (*authFlowTestOAuthProvider) ProviderUserIDColumn() string                   { return "" }
 
 func setupAuthFlowControllerTest(t *testing.T) *authFlowTestOAuthProvider {
 	t.Helper()

@@ -16,7 +16,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { describe, expect, test } from 'vitest'
+import assert from 'node:assert/strict'
+import { describe, test } from 'node:test'
 
 import {
   CHANNEL_TYPE_NEW_API,
@@ -44,40 +45,45 @@ describe('New API channel', () => {
       (item) => item.value === CHANNEL_TYPE_NEW_API
     )
 
-    expect(option).toEqual({
+    assert.deepEqual(option, {
       value: CHANNEL_TYPE_NEW_API,
       label: 'New API',
     })
-    expect(
+    assert.equal(
       CHANNEL_TYPE_OPTIONS.findIndex(
         (item) => item.value === CHANNEL_TYPE_NEW_API
-      ) + 1
-    ).toBe(CHANNEL_TYPE_OPTIONS.findIndex((item) => item.value === 58))
-    expect(MODEL_FETCHABLE_TYPES.has(CHANNEL_TYPE_NEW_API)).toBe(true)
-    expect(getChannelTypeIcon(CHANNEL_TYPE_NEW_API)).toBe('NewAPI')
-    expect(getKeyPromptForType(CHANNEL_TYPE_NEW_API)).toBe(
+      ) + 1,
+      CHANNEL_TYPE_OPTIONS.findIndex((item) => item.value === 58)
+    )
+    assert.equal(MODEL_FETCHABLE_TYPES.has(CHANNEL_TYPE_NEW_API), true)
+    assert.equal(getChannelTypeIcon(CHANNEL_TYPE_NEW_API), 'NewAPI')
+    assert.equal(
+      getKeyPromptForType(CHANNEL_TYPE_NEW_API),
       'Enter API key for this channel'
     )
-    expect(getChannelTypeConfig(CHANNEL_TYPE_NEW_API).icon).toBe('NewAPI')
+    assert.equal(getChannelTypeConfig(CHANNEL_TYPE_NEW_API).icon, 'NewAPI')
   })
 
   test('requires a non-blank Base URL', () => {
     const blankResult = channelFormSchema.safeParse(newAPIForm('  '))
 
-    expect(blankResult.success).toBe(false)
+    assert.equal(blankResult.success, false)
     if (!blankResult.success) {
-      expect(
+      assert.equal(
         blankResult.error.issues.some(
           (issue) =>
             issue.path[0] === 'base_url' &&
             issue.message === 'Base URL is required for this channel type'
-        )
-      ).toBe(true)
+        ),
+        true
+      )
     }
 
-    expect(
-      channelFormSchema.safeParse(newAPIForm('https://new-api.example')).success
-    ).toBe(true)
+    assert.equal(
+      channelFormSchema.safeParse(newAPIForm('https://new-api.example'))
+        .success,
+      true
+    )
   })
 
   test('keeps Sub2API Base URL validation unchanged', () => {
@@ -86,6 +92,6 @@ describe('New API channel', () => {
       type: 59,
     })
 
-    expect(result.success).toBe(true)
+    assert.equal(result.success, true)
   })
 })

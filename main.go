@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"context"
-	"embed"
 	"errors"
 	"fmt"
 	"log"
@@ -39,12 +38,6 @@ import (
 	_ "net/http/pprof"
 )
 
-//go:embed web/dist
-var buildFS embed.FS
-
-//go:embed web/dist/index.html
-var indexPage []byte
-
 func main() {
 	startTime := time.Now()
 	kitutil.SetLogging(common.SysLog, func(message string) {
@@ -59,7 +52,7 @@ func main() {
 	}
 
 	common.SysLog("New API " + common.Version + " started")
-	if os.Getenv("GIN_MODE") != "debug" {
+	if common.GetConfigOrEnv("GIN_MODE") != "debug" {
 		gin.SetMode(gin.ReleaseMode)
 	}
 	if common.DebugEnabled {
@@ -114,8 +107,8 @@ func main() {
 	// 数据看板
 	go model.UpdateQuotaData()
 
-	if os.Getenv("CHANNEL_UPDATE_FREQUENCY") != "" {
-		frequency, err := strconv.Atoi(os.Getenv("CHANNEL_UPDATE_FREQUENCY"))
+	if common.GetConfigOrEnv("CHANNEL_UPDATE_FREQUENCY") != "" {
+		frequency, err := strconv.Atoi(common.GetConfigOrEnv("CHANNEL_UPDATE_FREQUENCY"))
 		if err != nil {
 			common.FatalLog("failed to parse CHANNEL_UPDATE_FREQUENCY: " + err.Error())
 		}
@@ -151,13 +144,13 @@ func main() {
 	controller.RegisterScheduledSystemTasks()
 	service.StartSystemTaskRunner()
 
-	if os.Getenv("BATCH_UPDATE_ENABLED") == "true" {
+	if common.GetConfigOrEnv("BATCH_UPDATE_ENABLED") == "true" {
 		common.BatchUpdateEnabled = true
 		common.SysLog("batch update enabled with interval " + strconv.Itoa(common.BatchUpdateInterval) + "s")
 		model.InitBatchUpdater()
 	}
 
-	if os.Getenv("ENABLE_PPROF") == "true" {
+	if common.GetConfigOrEnv("ENABLE_PPROF") == "true" {
 		gopool.Go(func() {
 			log.Println(http.ListenAndServe("0.0.0.0:8005", nil))
 		})
@@ -199,7 +192,7 @@ func main() {
 		BuildFS:   buildFS,
 		IndexPage: indexPage,
 	})
-	var port = os.Getenv("PORT")
+	var port = common.GetConfigOrEnv("PORT")
 	if port == "" {
 		port = strconv.Itoa(*common.Port)
 	}
@@ -240,9 +233,9 @@ func main() {
 
 func InjectUmamiAnalytics() {
 	analyticsInjectBuilder := &strings.Builder{}
-	if os.Getenv("UMAMI_WEBSITE_ID") != "" {
-		umamiSiteID := os.Getenv("UMAMI_WEBSITE_ID")
-		umamiScriptURL := os.Getenv("UMAMI_SCRIPT_URL")
+	if common.GetConfigOrEnv("UMAMI_WEBSITE_ID") != "" {
+		umamiSiteID := common.GetConfigOrEnv("UMAMI_WEBSITE_ID")
+		umamiScriptURL := common.GetConfigOrEnv("UMAMI_SCRIPT_URL")
 		if umamiScriptURL == "" {
 			umamiScriptURL = "https://analytics.umami.is/script.js"
 		}
@@ -260,8 +253,8 @@ func InjectUmamiAnalytics() {
 
 func InjectGoogleAnalytics() {
 	analyticsInjectBuilder := &strings.Builder{}
-	if os.Getenv("GOOGLE_ANALYTICS_ID") != "" {
-		gaID := os.Getenv("GOOGLE_ANALYTICS_ID")
+	if common.GetConfigOrEnv("GOOGLE_ANALYTICS_ID") != "" {
+		gaID := common.GetConfigOrEnv("GOOGLE_ANALYTICS_ID")
 		// Google Analytics 4 (gtag.js)
 		analyticsInjectBuilder.WriteString("<script async src=\"https://www.googletagmanager.com/gtag/js?id=")
 		analyticsInjectBuilder.WriteString(gaID)
@@ -284,11 +277,15 @@ func InjectGoogleAnalytics() {
 func InitResources() error {
 	// Initialize resources here if needed
 	// This is a placeholder function for future resource initialization
+	common.ParseFlags()
 	err := godotenv.Load(".env")
 	if err != nil {
 		if common.DebugEnabled {
 			common.SysLog("No .env file found, using default environment variables. If needed, please create a .env file and set the relevant variables.")
 		}
+	}
+	if err := common.LoadStartupConfig(); err != nil {
+		return err
 	}
 
 	// 加载环境变量

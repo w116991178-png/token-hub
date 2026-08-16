@@ -20,10 +20,13 @@ For commercial licensing, please contact support@quantumnous.com
 // Affiliate Functions
 // ============================================================================
 
+import { REFERRAL_ROOT_DOMAIN } from '@/lib/referral-subdomain'
+
 /**
  * Generate affiliate registration link
  */
-export function generateAffiliateLink(affCode: string): string {
-  if (typeof window === 'undefined') return ''
-  return `${window.location.origin}/sign-up?aff=${affCode}`
+export function generateAffiliateLink(subdomain: string): string {
+  const normalizedSubdomain = subdomain.trim().toLowerCase()
+  if (!normalizedSubdomain) return ''
+  return `https://${normalizedSubdomain}.${REFERRAL_ROOT_DOMAIN}`
 }

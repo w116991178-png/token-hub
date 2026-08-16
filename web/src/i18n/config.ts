@@ -20,23 +20,26 @@ import i18n from 'i18next'
 import LanguageDetector from 'i18next-browser-languagedetector'
 import { initReactI18next } from 'react-i18next'
 
-import { convertDetectedLanguage } from './languages'
+import {
+  convertDetectedLanguage,
+  DEFAULT_INTERFACE_LANGUAGE,
+  INTERFACE_LANGUAGE_DETECTION_ORDER,
+  INTERFACE_LANGUAGE_OPTIONS,
+} from './languages'
 import en from './locales/en.json'
 import fr from './locales/fr.json'
 import ja from './locales/ja.json'
 import ru from './locales/ru.json'
 import vi from './locales/vi.json'
 import zhTW from './locales/zh-TW.json'
-import zhCN from './locales/zh.json'
 
 export const resources = {
   en,
-  zhCN,
   fr,
   ru,
   ja,
   vi,
-  zhTW,
+  'zh-TW': zhTW,
 } as const
 
 i18n
@@ -44,8 +47,8 @@ i18n
   .use(initReactI18next)
   .init({
     resources,
-    fallbackLng: 'en',
-    supportedLngs: ['en', 'zhCN', 'fr', 'ru', 'ja', 'vi', 'zhTW'],
+    fallbackLng: DEFAULT_INTERFACE_LANGUAGE,
+    supportedLngs: INTERFACE_LANGUAGE_OPTIONS.map((language) => language.code),
     load: 'currentOnly',
     nsSeparator: false, // Allow literal colons in keys (e.g., URLs, labels)
     debug: import.meta.env.DEV,
@@ -53,10 +56,9 @@ i18n
       escapeValue: false, // not needed for react as it escapes by default
     },
     detection: {
-      order: ['localStorage', 'navigator'],
+      order: INTERFACE_LANGUAGE_DETECTION_ORDER,
       caches: ['localStorage'],
-      // Browsers report `zh-CN`/`zh-TW`/`zh`; map them onto our `zhCN`/`zhTW`
-      // codes (non-Chinese codes pass through for normal supportedLngs matching).
+      // Only explicit saved preferences override the English default.
       convertDetectedLanguage,
     },
   })

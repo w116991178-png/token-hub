@@ -20,9 +20,6 @@ import { Link } from '@tanstack/react-router'
 import { ArrowRight } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
-import { AnimateInView } from '@/components/animate-in-view'
-import { Button } from '@/components/ui/button'
-
 interface CTAProps {
   className?: string
   isAuthenticated?: boolean
@@ -30,55 +27,38 @@ interface CTAProps {
 
 export function CTA(props: CTAProps) {
   const { t } = useTranslation()
-
-  if (props.isAuthenticated) {
-    return null
-  }
+  const target = props.isAuthenticated ? '/dashboard' : '/sign-up'
+  const label = props.isAuthenticated
+    ? t('Open dashboard')
+    : t('Create an account')
 
   return (
-    <section className='relative z-10 overflow-hidden px-6 py-24 md:py-32'>
-      {/* Gradient mesh background */}
-      <div
-        aria-hidden
-        className='absolute inset-0 -z-10 opacity-20 dark:opacity-[0.08]'
-        style={{
-          background: [
-            'radial-gradient(ellipse 50% 50% at 30% 50%, oklch(0.7 0.15 250 / 70%) 0%, transparent 70%)',
-            'radial-gradient(ellipse 40% 40% at 70% 40%, oklch(0.65 0.12 200 / 50%) 0%, transparent 70%)',
-          ].join(', '),
-        }}
-      />
-
-      <AnimateInView
-        className='mx-auto max-w-2xl text-center'
-        animation='scale-in'
-      >
-        <h2 className='text-2xl leading-tight font-bold tracking-tight md:text-4xl'>
-          {t('Ready to simplify')}
-          <br />
-          <span className='bg-gradient-to-r from-blue-400 via-violet-400 to-purple-500 bg-clip-text text-transparent'>
-            {t('your AI integration?')}
-          </span>
-        </h2>
-        <p className='text-muted-foreground/80 mx-auto mt-5 max-w-md text-sm leading-relaxed md:text-base'>
-          {t(
-            'Deploy your own gateway and start routing requests through your configured upstream services.'
-          )}
-        </p>
-        <div className='mt-8 flex items-center justify-center gap-3'>
-          <Button className='group rounded-lg' render={<Link to='/sign-up' />}>
-            {t('Get Started')}
-            <ArrowRight className='ml-1 size-3.5 transition-transform duration-200 group-hover:translate-x-0.5' />
-          </Button>
-          <Button
-            variant='outline'
-            className='border-border/50 hover:border-border hover:bg-muted/50 rounded-lg'
-            render={<Link to='/pricing' />}
+    <section className='px-4 py-20 md:px-8 md:py-28'>
+      <div className='relative mx-auto max-w-[86rem] overflow-hidden rounded-[2rem] bg-[#ff6b4a] px-6 py-14 text-[#24221f] sm:px-10 md:py-20 lg:px-16'>
+        <div aria-hidden='true' className='token-hub-cta-orbit' />
+        <div className='relative grid items-end gap-10 lg:grid-cols-[1fr_auto]'>
+          <div>
+            <p className='text-[10px] font-black tracking-[0.2em] uppercase opacity-60'>
+              03 / {t('Your next request')}
+            </p>
+            <h2 className='mt-5 max-w-4xl text-[clamp(2.6rem,6vw,6rem)] leading-[0.9] font-black tracking-[-0.075em]'>
+              {t('Make every token count.')}
+            </h2>
+            <p className='mt-6 max-w-xl text-sm leading-6 font-bold opacity-65 md:text-base'>
+              {t(
+                'Start with one key and one endpoint. Token Hub handles the routing, metering, and operational clarity behind it.'
+              )}
+            </p>
+          </div>
+          <Link
+            to={target}
+            className='group inline-flex h-14 w-fit shrink-0 items-center gap-6 rounded-full bg-[#24221f] px-7 text-sm font-black text-[#f4f0e8] transition-transform hover:-translate-y-1'
           >
-            {t('View Pricing')}
-          </Button>
+            {label}
+            <ArrowRight className='size-4 transition-transform group-hover:translate-x-1' />
+          </Link>
         </div>
-      </AnimateInView>
+      </div>
     </section>
   )
 }

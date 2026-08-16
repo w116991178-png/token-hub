@@ -31,7 +31,8 @@ import { generateAffiliateLink } from '../lib'
 // ============================================================================
 
 export function useAffiliate() {
-  const [affiliateCode, setAffiliateCode] = useState<string>('')
+  const [affiliateEnabled, setAffiliateEnabled] = useState(false)
+  const [affiliateSubdomain, setAffiliateSubdomain] = useState('')
   const [affiliateLink, setAffiliateLink] = useState<string>('')
   const [loading, setLoading] = useState(true)
   const [transferring, setTransferring] = useState(false)
@@ -44,9 +45,13 @@ export function useAffiliate() {
       const response = await getAffiliateCode()
 
       if (response.success && response.data) {
-        setAffiliateCode(response.data)
-        const link = generateAffiliateLink(response.data)
-        setAffiliateLink(link)
+        setAffiliateEnabled(response.data.enabled)
+        setAffiliateSubdomain(response.data.subdomain)
+        setAffiliateLink(
+          response.data.enabled
+            ? generateAffiliateLink(response.data.subdomain)
+            : ''
+        )
       }
     } catch (error) {
       // eslint-disable-next-line no-console
@@ -75,7 +80,7 @@ export function useAffiliate() {
 
       toast.error(response.message || i18next.t('Transfer failed'))
       return false
-    } catch (_error) {
+    } catch {
       toast.error(i18next.t('Transfer failed'))
       return false
     } finally {
@@ -88,7 +93,8 @@ export function useAffiliate() {
   }, [fetchAffiliateCode])
 
   return {
-    affiliateCode,
+    affiliateEnabled,
+    affiliateSubdomain,
     affiliateLink,
     loading,
     transferring,

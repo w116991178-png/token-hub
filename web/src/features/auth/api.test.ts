@@ -16,7 +16,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { describe, expect, test } from 'vitest'
+import assert from 'node:assert/strict'
+import { describe, test } from 'node:test'
 
 import type { RefreshOutcome } from '@/lib/api'
 import type { AuthBundle } from '@/stores/auth-store'
@@ -62,8 +63,8 @@ describe('logout coordination', () => {
       },
     })
 
-    expect(result).toEqual({ success: false, message: 'not revoked' })
-    expect(refreshCount).toBe(0)
+    assert.deepEqual(result, { success: false, message: 'not revoked' })
+    assert.equal(refreshCount, 0)
   })
 
   test('recovers a cookie mismatch and retries with the refreshed SID', async () => {
@@ -82,8 +83,8 @@ describe('logout coordination', () => {
       },
     })
 
-    expect(result).toEqual({ success: true, message: '' })
-    expect(requestedSIDs).toEqual(['session-a', 'session-b'])
+    assert.deepEqual(result, { success: true, message: '' })
+    assert.deepEqual(requestedSIDs, ['session-a', 'session-b'])
   })
 
   test('treats a mismatch that refresh confirms anonymous as signed out', async () => {
@@ -95,7 +96,7 @@ describe('logout coordination', () => {
       refresh: async () => ({ kind: 'anonymous' }),
     })
 
-    expect(result).toEqual({ success: true, message: '' })
+    assert.deepEqual(result, { success: true, message: '' })
   })
 
   test('preserves the active session when mismatch recovery is temporary', async () => {
@@ -105,14 +106,15 @@ describe('logout coordination', () => {
       error: new Error('offline'),
     }
 
-    await expect(
+    await assert.rejects(
       executeLogout({
         getExpectedSID: () => 'session-a',
         request: async () => {
           throw originalError
         },
         refresh: async () => transient,
-      })
-    ).rejects.toBe(originalError)
+      }),
+      (error) => error === originalError
+    )
   })
 })

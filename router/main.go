@@ -3,7 +3,6 @@ package router
 import (
 	"fmt"
 	"net/http"
-	"os"
 	"strings"
 
 	"github.com/QuantumNous/new-api/common"
@@ -17,13 +16,18 @@ func SetRouter(router *gin.Engine, assets WebAssets) {
 	SetDashboardRouter(router)
 	SetRelayRouter(router)
 	SetVideoRouter(router)
-	frontendBaseUrl := os.Getenv("FRONTEND_BASE_URL")
+	frontendBaseUrl := common.GetConfigOrEnv("FRONTEND_BASE_URL")
 	if common.IsMasterNode && frontendBaseUrl != "" {
 		frontendBaseUrl = ""
 		common.SysLog("FRONTEND_BASE_URL is ignored on master node")
 	}
 	if frontendBaseUrl == "" {
-		SetWebRouter(router, assets)
+		if assets.BuildFS == nil {
+			common.SysError("前端资源未内嵌（noembed 构建）且未设置 FRONTEND_BASE_URL，Web 页面将不可用；" +
+				"请通过 Nginx 等反向代理托管前端静态文件，或设置 FRONTEND_BASE_URL 指向前端站点。")
+		} else {
+			SetWebRouter(router, assets)
+		}
 	} else {
 		frontendBaseUrl = strings.TrimSuffix(frontendBaseUrl, "/")
 		router.NoRoute(func(c *gin.Context) {

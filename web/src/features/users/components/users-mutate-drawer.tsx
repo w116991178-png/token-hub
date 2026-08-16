@@ -61,6 +61,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet'
+import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import {
   ADMIN_PERMISSION_ACTIONS,
@@ -71,6 +72,10 @@ import {
 } from '@/lib/admin-permissions'
 import { getCurrencyDisplay, getCurrencyLabel } from '@/lib/currency'
 import { formatQuota, parseQuotaFromDollars } from '@/lib/format'
+import {
+  normalizeReferralSubdomain,
+  REFERRAL_ROOT_DOMAIN,
+} from '@/lib/referral-subdomain'
 import { ROLE } from '@/lib/roles'
 import { useAuthStore } from '@/stores/auth-store'
 
@@ -89,7 +94,7 @@ import {
   transformFormDataToPayload,
   transformUserToFormDefaults,
 } from '../lib'
-import { type User } from '../types'
+import type { User } from '../types'
 import { UserQuotaDialog } from './user-quota-dialog'
 import { useUsers } from './users-provider'
 
@@ -136,16 +141,18 @@ export function UsersMutateDrawer({
   useEffect(() => {
     if (open && isUpdate && currentRow) {
       // For update, fetch fresh data
-      getUser(currentRow.id).then((result) => {
-        if (result.success && result.data) {
-          form.reset(transformUserToFormDefaults(result.data))
-        }
-      })
+      void getUser(currentRow.id)
+        .then((result) => {
+          if (result.success && result.data) {
+            form.reset(transformUserToFormDefaults(result.data))
+          }
+        })
+        .catch(() => toast.error(t(ERROR_MESSAGES.UNEXPECTED)))
     } else if (open && !isUpdate) {
       // For create, reset to defaults
       form.reset(USER_FORM_DEFAULT_VALUES)
     }
-  }, [open, isUpdate, currentRow, form])
+  }, [open, isUpdate, currentRow, form, t])
 
   const { meta: currencyMeta } = getCurrencyDisplay()
   const currencyLabel = getCurrencyLabel()
@@ -153,6 +160,7 @@ export function UsersMutateDrawer({
 
   const currentQuotaRaw = form.watch('quota_dollars') || 0
   const selectedRole = form.watch('role')
+  const affiliateEnabled = form.watch('aff_enabled')
   const canEditAdminPermissions = currentUser?.role === ROLE.SUPER_ADMIN
   const targetIsAdmin = (selectedRole ?? currentRow?.role ?? 0) >= ROLE.ADMIN
 
@@ -195,7 +203,7 @@ export function UsersMutateDrawer({
               : t(ERROR_MESSAGES.CREATE_FAILED))
         )
       }
-    } catch (_error) {
+    } catch {
       toast.error(t(ERROR_MESSAGES.UNEXPECTED))
     } finally {
       setIsSubmitting(false)
@@ -278,7 +286,8 @@ export function UsersMutateDrawer({
                             { value: '10', label: t('Admin') },
                           ]}
                           onValueChange={(value) =>
-                            value !== null && field.onChange(parseInt(value))
+                            value !== null &&
+                            field.onChange(Number.parseInt(value))
                           }
                           value={String(field.value)}
                         >
@@ -348,6 +357,72 @@ export function UsersMutateDrawer({
                 />
               </SideDrawerSection>
 
+              <SideDrawerSection>
+                <h3 className='text-sm font-medium'>{t('Referral Agent')}</h3>
+
+                <FormField
+                  control={form.control}
+                  name='aff_enabled'
+                  render={({ field }) => (
+                    <FormItem className='flex items-center justify-between gap-4 rounded-md border p-3'>
+                      <div className='space-y-1'>
+                        <FormLabel>{t('Enable Referral Agent')}</FormLabel>
+                        <FormDescription>
+                          {t(
+                            'Disabled by default. Enable only after assigning a unique referral subdomain.'
+                          )}
+                        </FormDescription>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                          aria-label={t('Enable Referral Agent')}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                {affiliateEnabled && (
+                  <FormField
+                    control={form.control}
+                    name='aff_subdomain'
+                    render={({ field, fieldState }) => (
+                      <FormItem>
+                        <FormLabel>{t('Referral Subdomain Prefix')}</FormLabel>
+                        <div className='focus-within:ring-ring/50 flex min-w-0 items-center rounded-md border focus-within:ring-2'>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              value={field.value}
+                              onChange={(event) =>
+                                field.onChange(
+                                  normalizeReferralSubdomain(event.target.value)
+                                )
+                              }
+                              placeholder='partner'
+                              autoComplete='off'
+                              aria-invalid={fieldState.invalid}
+                              className='min-w-0 flex-1 border-0 font-mono shadow-none focus-visible:ring-0'
+                            />
+                          </FormControl>
+                          <span className='text-muted-foreground shrink-0 pr-3 font-mono text-sm'>
+                            .{REFERRAL_ROOT_DOMAIN}
+                          </span>
+                        </div>
+                        <FormDescription>
+                          {t(
+                            'Use at least two letters. Lowercase letters, numbers, and single hyphens are allowed; reserved platform names are blocked.'
+                          )}
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+              </SideDrawerSection>
+
               {/* Group & Quota Settings (Update only) */}
               {isUpdate && (
                 <SideDrawerSection>
@@ -360,12 +435,10 @@ export function UsersMutateDrawer({
                       <FormItem>
                         <FormLabel>{t('Group')}</FormLabel>
                         <Select
-                          items={[
-                            ...groups.map((group) => ({
-                              value: group,
-                              label: group,
-                            })),
-                          ]}
+                          items={groups.map((group) => ({
+                            value: group,
+                            label: group,
+                          }))}
                           onValueChange={field.onChange}
                           value={field.value}
                         >

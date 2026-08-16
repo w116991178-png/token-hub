@@ -16,24 +16,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
+export const TOKEN_HUB_BRAND = {
+  name: 'token-hub',
+  host: 'token-hub.io',
+  siteUrl: 'https://token-hub.io',
+  apiBase: 'https://token-hub.io/v1',
+} as const
 
-import { defineConfig } from 'vitest/config'
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-
-export default defineConfig({
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'),
-    },
-  },
-  test: {
-    environment: 'jsdom',
-    setupFiles: ['./src/test-setup.ts'],
-    clearMocks: true,
-    restoreMocks: true,
-    include: ['src/**/*.{test,spec}.{ts,tsx}'],
-  },
-})
+export const TOKEN_HUB_LAYOUT = {
+  hero: 'grid items-center gap-14 lg:grid-cols-[1.12fr_0.88fr] lg:gap-16',
+  stats: 'grid grid-cols-2 md:grid-cols-4',
+  features: 'grid gap-px md:grid-cols-2 lg:grid-cols-3',
+} as const

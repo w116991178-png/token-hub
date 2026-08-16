@@ -3,7 +3,6 @@ package common
 import (
 	"crypto/rand"
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 
@@ -118,7 +117,7 @@ func Get2FAIssuer() string {
 
 // getEnvOrDefault 获取环境变量或默认值
 func getEnvOrDefault(key, defaultValue string) string {
-	if value, exists := os.LookupEnv(key); exists {
+	if value, exists := LookupConfigOrEnv(key); exists {
 		return value
 	}
 	return defaultValue

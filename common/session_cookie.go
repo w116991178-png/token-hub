@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net"
 	"net/url"
-	"os"
 	"strings"
 )
 
@@ -42,8 +41,8 @@ func NormalizeOrigin(raw string) (string, error) {
 }
 
 func InitSessionCookieSettings() error {
-	secureRaw := strings.TrimSpace(os.Getenv("SESSION_COOKIE_SECURE"))
-	trustedURLsRaw := strings.TrimSpace(os.Getenv("SESSION_COOKIE_TRUSTED_URL"))
+	secureRaw := strings.TrimSpace(GetConfigOrEnv("SESSION_COOKIE_SECURE"))
+	trustedURLsRaw := strings.TrimSpace(GetConfigOrEnv("SESSION_COOKIE_TRUSTED_URL"))
 
 	SessionCookieSecure = false
 	SessionCookieTrustedURLs = nil

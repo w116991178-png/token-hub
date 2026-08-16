@@ -119,7 +119,7 @@ func IsRunningInContainer() bool {
 	}
 
 	for _, envVar := range containerEnvVars {
-		if os.Getenv(envVar) != "" {
+		if GetConfigOrEnv(envVar) != "" {
 			return true
 		}
 	}

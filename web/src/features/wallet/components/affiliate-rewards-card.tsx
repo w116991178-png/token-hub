@@ -31,6 +31,7 @@ import type { UserWalletData } from '../types'
 
 interface AffiliateRewardsCardProps {
   user: UserWalletData | null
+  affiliateEnabled: boolean
   affiliateLink: string
   onTransfer: () => void
   complianceConfirmed?: boolean
@@ -39,6 +40,7 @@ interface AffiliateRewardsCardProps {
 
 export function AffiliateRewardsCard({
   user,
+  affiliateEnabled,
   affiliateLink,
   onTransfer,
   complianceConfirmed = true,
@@ -98,20 +100,30 @@ export function AffiliateRewardsCard({
           ))}
         </div>
 
-        <div className='flex items-center gap-2'>
-          <Input
-            value={affiliateLink}
-            readOnly
-            className='border-muted bg-background/70 h-9 min-w-0 flex-1 font-mono text-xs'
-          />
-          <CopyButton
-            value={affiliateLink}
-            variant='outline'
-            className='bg-background size-9 shrink-0'
-            iconClassName='size-4'
-            tooltip={t('Copy referral link')}
-            aria-label={t('Copy referral link')}
-          />
+        <div className='flex min-w-0 items-center gap-2'>
+          {affiliateEnabled ? (
+            <>
+              <Input
+                value={affiliateLink}
+                readOnly
+                className='border-muted bg-background/70 h-9 min-w-0 flex-1 font-mono text-xs'
+              />
+              <CopyButton
+                value={affiliateLink}
+                variant='outline'
+                className='bg-background size-9 shrink-0'
+                iconClassName='size-4'
+                tooltip={t('Copy referral link')}
+                aria-label={t('Copy referral link')}
+              />
+            </>
+          ) : (
+            <p className='text-muted-foreground min-w-0 flex-1 text-xs'>
+              {t(
+                'Referral agent access is not enabled. Contact an administrator to apply.'
+              )}
+            </p>
+          )}
           {hasRewards && (
             <Button
               onClick={onTransfer}

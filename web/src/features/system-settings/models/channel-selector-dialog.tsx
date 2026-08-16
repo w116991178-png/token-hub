@@ -39,7 +39,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { useDebounce } from '@/hooks/use-debounce'
 
 import type { UpstreamChannel } from '../types'
 import {
@@ -81,7 +80,6 @@ export function ChannelSelectorDialog({
 }: ChannelSelectorDialogProps) {
   const { t } = useTranslation()
   const [search, setSearch] = useState('')
-  const debouncedSearch = useDebounce(search, 200)
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
 
   useEffect(() => {
@@ -275,15 +273,15 @@ export function ChannelSelectorDialog({
   )
 
   const filteredChannels = useMemo(() => {
-    if (!debouncedSearch.trim()) return channels
+    if (!search.trim()) return channels
 
-    const searchLower = debouncedSearch.toLowerCase()
+    const searchLower = search.toLowerCase()
     return channels.filter(
       (ch) =>
         ch.name.toLowerCase().includes(searchLower) ||
         ch.base_url.toLowerCase().includes(searchLower)
     )
-  }, [channels, debouncedSearch])
+  }, [channels, search])
 
   const sortedChannels = useMemo(() => {
     return [...filteredChannels].sort((a, b) => {

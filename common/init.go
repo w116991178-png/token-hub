@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/QuantumNous/new-api/constant"
@@ -20,19 +21,33 @@ var (
 	PrintVersion = flag.Bool("version", false, "print version and exit")
 	PrintHelp    = flag.Bool("help", false, "print help and exit")
 	LogDir       = flag.String("log-dir", "./logs", "specify the log directory")
+	ConfigFile   = flag.String("config", "./config.yaml", "specify the YAML configuration file")
+	parseFlags   sync.Once
 )
 
 func printHelp() {
 	fmt.Println("NewAPI(Based OneAPI) " + Version + " - The next-generation LLM gateway and AI asset management system supports multiple languages.")
 	fmt.Println("Original Project: OneAPI by JustSong - https://github.com/songquanpeng/one-api")
 	fmt.Println("Maintainer: QuantumNous - https://github.com/QuantumNous/new-api")
-	fmt.Println("Usage: newapi [--port <port>] [--log-dir <log directory>] [--version] [--help]")
+	fmt.Println("Usage: newapi [--config <config file>] [--port <port>] [--log-dir <log directory>] [--version] [--help]")
+}
+
+func ParseFlags() {
+	parseFlags.Do(flag.Parse)
 }
 
 func InitEnv() {
-	flag.Parse()
+	ParseFlags()
 
-	envVersion := os.Getenv("VERSION")
+	if timezoneName := GetConfigOrEnv("TZ"); timezoneName != "" {
+		location, err := time.LoadLocation(timezoneName)
+		if err != nil {
+			log.Fatalf("invalid timezone %q: %v", timezoneName, err)
+		}
+		time.Local = location
+	}
+
+	envVersion := GetConfigOrEnv("VERSION")
 	if envVersion != "" {
 		Version = envVersion
 	}
@@ -47,8 +62,8 @@ func InitEnv() {
 		os.Exit(0)
 	}
 
-	if os.Getenv("SESSION_SECRET") != "" {
-		ss := os.Getenv("SESSION_SECRET")
+	if GetConfigOrEnv("SESSION_SECRET") != "" {
+		ss := GetConfigOrEnv("SESSION_SECRET")
 		if ss == "random_string" {
 			log.Println("WARNING: SESSION_SECRET is set to the default value 'random_string', please change it to a random string.")
 			log.Println("警告：SESSION_SECRET被设置为默认值'random_string'，请修改为随机字符串。")
@@ -57,8 +72,8 @@ func InitEnv() {
 			SessionSecret = ss
 		}
 	}
-	if os.Getenv("CRYPTO_SECRET") != "" {
-		CryptoSecret = os.Getenv("CRYPTO_SECRET")
+	if GetConfigOrEnv("CRYPTO_SECRET") != "" {
+		CryptoSecret = GetConfigOrEnv("CRYPTO_SECRET")
 	} else {
 		CryptoSecret = SessionSecret
 	}
@@ -66,8 +81,11 @@ func InitEnv() {
 		log.Fatal(err)
 	}
 	initUserSessionSettings()
-	if os.Getenv("SQLITE_PATH") != "" {
-		SQLitePath = os.Getenv("SQLITE_PATH")
+	if GetConfigOrEnv("SQLITE_PATH") != "" {
+		SQLitePath = GetConfigOrEnv("SQLITE_PATH")
+	}
+	if GetConfigOrEnv("LOG_DIR") != "" {
+		*LogDir = GetConfigOrEnv("LOG_DIR")
 	}
 	if *LogDir != "" {
 		var err error
@@ -84,9 +102,9 @@ func InitEnv() {
 	}
 
 	// Initialize variables from constants.go that were using environment variables
-	DebugEnabled = os.Getenv("DEBUG") == "true"
-	MemoryCacheEnabled = os.Getenv("MEMORY_CACHE_ENABLED") == "true"
-	IsMasterNode = os.Getenv("NODE_TYPE") != "slave"
+	DebugEnabled = GetConfigOrEnv("DEBUG") == "true"
+	MemoryCacheEnabled = GetConfigOrEnv("MEMORY_CACHE_ENABLED") == "true"
+	IsMasterNode = GetConfigOrEnv("NODE_TYPE") != "slave"
 	initNodeNameIdentity()
 	TLSInsecureSkipVerify = GetEnvOrDefaultBool("TLS_INSECURE_SKIP_VERIFY", false)
 	if TLSInsecureSkipVerify {
@@ -102,7 +120,7 @@ func InitEnv() {
 	SMTPInsecureSkipVerify = GetEnvOrDefaultBool("SMTP_INSECURE_SKIP_VERIFY", GetEnvOrDefaultBool("SMTP_TLS_INSECURE_SKIP_VERIFY", false))
 
 	// Parse requestInterval and set RequestInterval
-	requestInterval, _ = strconv.Atoi(os.Getenv("POLLING_INTERVAL"))
+	requestInterval, _ = strconv.Atoi(GetConfigOrEnv("POLLING_INTERVAL"))
 	RequestInterval = time.Duration(requestInterval) * time.Second
 
 	// Initialize variables with GetEnvOrDefault

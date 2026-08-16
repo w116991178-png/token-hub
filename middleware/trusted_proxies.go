@@ -4,9 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"os"
 	"strings"
 
+	"github.com/QuantumNous/new-api/common"
 	"github.com/gin-gonic/gin"
 )
 
@@ -20,7 +20,7 @@ var defaultTrustedProxyCIDRs = []string{
 }
 
 func ConfigureTrustedProxies(engine *gin.Engine) error {
-	rawTrustedProxies := strings.TrimSpace(os.Getenv("TRUSTED_PROXIES"))
+	rawTrustedProxies := strings.TrimSpace(common.GetConfigOrEnv("TRUSTED_PROXIES"))
 	if rawTrustedProxies == "" {
 		log.Print("WARNING: TRUSTED_PROXIES is unset or blank; trusting loopback, RFC 1918, and IPv6 ULA proxy addresses for compatibility. Set TRUSTED_PROXIES=none to trust no proxies, or configure explicit proxy IPs/CIDRs to replace these defaults.")
 		return engine.SetTrustedProxies(defaultTrustedProxyCIDRs)

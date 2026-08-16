@@ -195,6 +195,11 @@ func loadOptionsFromDatabase() {
 			common.SysLog("failed to update option map: " + err.Error())
 		}
 	}
+	for key, value := range common.StartupOptionOverrides() {
+		if err := updateOptionMap(key, value); err != nil {
+			common.SysLog("failed to apply configuration option override: " + err.Error())
+		}
+	}
 }
 
 func SyncOptions(frequency int) {

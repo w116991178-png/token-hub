@@ -58,12 +58,8 @@ func ollamaToolCallsToOpenAI(toolCalls []OllamaToolCall, startIndex int, include
 				argBytes = []byte("{}")
 			}
 		}
-		toolCallID := tc.ID
-		if toolCallID == "" {
-			toolCallID = fmt.Sprintf("call_%d", startIndex)
-		}
 		tr := dto.ToolCallResponse{
-			ID:   toolCallID,
+			ID:   fmt.Sprintf("call_%d", startIndex),
 			Type: "function",
 			Function: dto.FunctionResponse{
 				Name:      tc.Function.Name,

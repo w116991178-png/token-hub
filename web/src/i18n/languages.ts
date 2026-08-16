@@ -17,66 +17,49 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 export const INTERFACE_LANGUAGE_OPTIONS = [
-  { code: 'zhCN', label: '简体中文' },
   { code: 'en', label: 'English' },
   { code: 'fr', label: 'Français' },
   { code: 'ru', label: 'Русский' },
   { code: 'ja', label: '日本語' },
   { code: 'vi', label: 'Tiếng Việt' },
-  { code: 'zhTW', label: '繁體中文' },
+  { code: 'zh-TW', label: '繁體中文' },
 ] as const
+
+export const DEFAULT_INTERFACE_LANGUAGE = 'en'
+export const INTERFACE_LANGUAGE_DETECTION_ORDER = ['localStorage']
 
 export type InterfaceLanguageCode =
   (typeof INTERFACE_LANGUAGE_OPTIONS)[number]['code']
 
 export function normalizeInterfaceLanguage(value?: string | null): string {
-  if (!value) return 'en'
+  if (!value) return DEFAULT_INTERFACE_LANGUAGE
 
-  let normalized = value.trim().replaceAll('_', '-').toLowerCase()
-  if (
-    value === 'zh-TW' ||
-    value === 'zh-HK' ||
-    value === 'zh-MO' ||
-    value === 'zhTW'
-  ) {
-    normalized = 'zhTW'
-  }
-  if (value === 'zh-CN' || value === 'zh-Hans' || value === 'zhCN') {
-    normalized = 'zhCN'
-  }
+  const normalized = value.trim().replaceAll('_', '-').toLowerCase()
+  if (normalized.startsWith('zh')) return 'zh-TW'
 
-  return INTERFACE_LANGUAGE_OPTIONS.some((lang) => lang.code === normalized)
-    ? normalized
-    : 'en'
+  const supportedLanguage = INTERFACE_LANGUAGE_OPTIONS.find(
+    (language) => language.code.toLowerCase() === normalized
+  )
+  return supportedLanguage?.code ?? DEFAULT_INTERFACE_LANGUAGE
 }
 
 /**
  * Map a browser-detected locale onto the interface language codes this project
- * uses with i18next (`zhCN` / `zhTW`).
+ * uses with i18next.
  *
- * Browsers report standard BCP-47 tags (`zh-CN`, `zh-TW`, `zh-Hant`, `zh`, ...),
- * but `supportedLngs`/resources use the non-standard camelCase codes, so without
- * this mapping a Chinese browser would never match and fall back to English.
- * Non-Chinese codes are returned unchanged so i18next's own `supportedLngs`
- * matching still applies (e.g. `fr-FR` -> `fr`, `ja` -> `ja`).
+ * Every Chinese locale intentionally resolves to Traditional Chinese because
+ * the product does not target the Simplified Chinese market. Non-Chinese codes
+ * pass through for i18next's normal matching (e.g. `fr-FR` -> `fr`).
  */
 export function convertDetectedLanguage(value: string): string {
   const lower = value.trim().replaceAll('_', '-').toLowerCase()
   if (!lower.startsWith('zh')) return value
-  if (
-    lower === 'zh-tw' ||
-    lower === 'zh-hk' ||
-    lower === 'zh-mo' ||
-    lower.startsWith('zh-hant')
-  ) {
-    return 'zhTW'
-  }
-  return 'zhCN'
+  return 'zh-TW'
 }
 
 /**
- * Convert an interface language code (the values i18next uses, such as `zhCN` /
- * `zhTW`) into a valid BCP-47 locale tag that the `Intl.*` APIs accept.
+ * Convert an interface language code into a valid BCP-47 locale tag that the
+ * `Intl.*` APIs accept. Legacy Chinese codes are migrated to Traditional.
  *
  * `new Intl.NumberFormat('zhCN')` throws `RangeError: Invalid language tag`, so
  * any locale derived from `i18n.language` / `i18n.resolvedLanguage` MUST be run
@@ -85,14 +68,9 @@ export function convertDetectedLanguage(value: string): string {
  */
 export function toIntlLocale(value?: string | null): string | undefined {
   if (!value) return undefined
-  switch (value) {
-    case 'zhCN':
-      return 'zh-CN'
-    case 'zhTW':
-      return 'zh-TW'
-    default:
-      break
-  }
+  const normalized = value.trim().replaceAll('_', '-').toLowerCase()
+  if (normalized.startsWith('zh')) return 'zh-TW'
+
   try {
     return Intl.getCanonicalLocales(value)[0]
   } catch {

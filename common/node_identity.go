@@ -10,7 +10,7 @@ type NodeIdentity struct {
 }
 
 func initNodeNameIdentity() {
-	if envNodeName := os.Getenv("NODE_NAME"); envNodeName != "" {
+	if envNodeName := GetConfigOrEnv("NODE_NAME"); envNodeName != "" {
 		NodeName = envNodeName
 		NodeNameSource = NodeNameSourceManual
 		NodeNameManuallyConfigured = true

@@ -1,9 +1,9 @@
 package operation_setting
 
 import (
-	"os"
 	"strconv"
 
+	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/setting/config"
 )
 
@@ -15,7 +15,6 @@ type MonitorSetting struct {
 
 const (
 	ChannelTestModeScheduledAll    = "scheduled_all"
-	ChannelTestModeAutoBanOnly     = "auto_ban_only"
 	ChannelTestModePassiveRecovery = "passive_recovery"
 )
 
@@ -32,23 +31,21 @@ func init() {
 }
 
 func GetMonitorSetting() *MonitorSetting {
-	if os.Getenv("CHANNEL_TEST_FREQUENCY") != "" {
-		frequency, err := strconv.Atoi(os.Getenv("CHANNEL_TEST_FREQUENCY"))
+	if common.GetConfigOrEnv("CHANNEL_TEST_FREQUENCY") != "" {
+		frequency, err := strconv.Atoi(common.GetConfigOrEnv("CHANNEL_TEST_FREQUENCY"))
 		if err == nil && frequency > 0 {
 			monitorSetting.AutoTestChannelEnabled = true
 			monitorSetting.AutoTestChannelMinutes = float64(frequency)
 			monitorSetting.ChannelTestMode = ChannelTestModeScheduledAll
 		}
 	}
-	if enabled, ok := os.LookupEnv("CHANNEL_TEST_ENABLED"); ok {
+	if enabled, ok := common.LookupConfigOrEnv("CHANNEL_TEST_ENABLED"); ok {
 		parsed, err := strconv.ParseBool(enabled)
 		if err == nil {
 			monitorSetting.AutoTestChannelEnabled = parsed
 		}
 	}
-	switch monitorSetting.ChannelTestMode {
-	case ChannelTestModeAutoBanOnly, ChannelTestModePassiveRecovery:
-	default:
+	if monitorSetting.ChannelTestMode != ChannelTestModePassiveRecovery {
 		monitorSetting.ChannelTestMode = ChannelTestModeScheduledAll
 	}
 	return &monitorSetting

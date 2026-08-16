@@ -19,32 +19,51 @@ For commercial licensing, please contact support@quantumnous.com
 import { z } from 'zod'
 
 import {
+  normalizeAdminPermissions,
   type PermissionCatalog,
   type AdminPermissionMatrix,
-  normalizeAdminPermissions,
 } from '@/lib/admin-permissions'
 import { quotaUnitsToDollars } from '@/lib/format'
+import {
+  normalizeReferralSubdomain,
+  validateReferralSubdomain,
+} from '@/lib/referral-subdomain'
 import { ROLE } from '@/lib/roles'
 
 import { DEFAULT_GROUP } from '../constants'
-import { type UserFormData, type User } from '../types'
+import type { UserFormData, User } from '../types'
 
 // ============================================================================
 // Form Schema
 // ============================================================================
 
-export const userFormSchema = z.object({
-  username: z.string().min(1, 'Username is required'),
-  display_name: z.string().optional(),
-  password: z.string().optional(),
-  role: z.number().optional(),
-  quota_dollars: z.number().min(0).optional(),
-  group: z.string().optional(),
-  remark: z.string().optional(),
-  admin_permissions: z
-    .record(z.string(), z.record(z.string(), z.boolean()))
-    .optional(),
-})
+export const userFormSchema = z
+  .object({
+    username: z.string().min(1, 'Username is required'),
+    display_name: z.string().optional(),
+    password: z.string().optional(),
+    role: z.number().optional(),
+    quota_dollars: z.number().min(0).optional(),
+    group: z.string().optional(),
+    remark: z.string().optional(),
+    aff_enabled: z.boolean(),
+    aff_subdomain: z.string(),
+    admin_permissions: z
+      .record(z.string(), z.record(z.string(), z.boolean()))
+      .optional(),
+  })
+  .superRefine((data, context) => {
+    if (!data.aff_enabled) return
+
+    const message = validateReferralSubdomain(data.aff_subdomain)
+    if (message) {
+      context.addIssue({
+        code: 'custom',
+        path: ['aff_subdomain'],
+        message,
+      })
+    }
+  })
 
 export type UserFormValues = z.infer<typeof userFormSchema>
 
@@ -60,6 +79,8 @@ export const USER_FORM_DEFAULT_VALUES: UserFormValues = {
   quota_dollars: 0,
   group: DEFAULT_GROUP,
   remark: '',
+  aff_enabled: false,
+  aff_subdomain: '',
   // Filled against the backend catalog at render time; see UsersMutateDrawer.
   admin_permissions: {},
 }
@@ -80,6 +101,10 @@ export function transformFormDataToPayload(
     username: data.username,
     display_name: data.display_name || data.username,
     password: data.password || undefined,
+    aff_enabled: data.aff_enabled,
+    aff_subdomain: data.aff_enabled
+      ? normalizeReferralSubdomain(data.aff_subdomain)
+      : '',
   }
 
   const role = userId === undefined ? data.role || 1 : (data.role ?? 0)
@@ -121,6 +146,8 @@ export function transformUserToFormDefaults(user: User): UserFormValues {
     quota_dollars: quotaUnitsToDollars(user.quota),
     group: user.group || DEFAULT_GROUP,
     remark: user.remark || '',
+    aff_enabled: user.aff_enabled ?? false,
+    aff_subdomain: user.aff_subdomain ?? '',
     admin_permissions: user.admin_permissions ?? {},
   }
 }

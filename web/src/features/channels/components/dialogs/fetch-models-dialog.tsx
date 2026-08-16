@@ -53,26 +53,16 @@ function normalizeModelNameList(models: readonly string[]): string[] {
   return [...new Set(models.map((m) => normalizeModelName(m)).filter(Boolean))]
 }
 
-type FetchModelsDialogBaseProps = {
+type FetchModelsDialogProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
+  onModelsSelected?: (models: string[]) => void
   redirectModels?: string[]
   redirectSourceModels?: string[]
   customFetcher?: () => Promise<string[]>
+  existingModelsOverride?: string[]
   channelName?: string | null
 }
-
-type FetchModelsDialogProps = FetchModelsDialogBaseProps &
-  (
-    | {
-        onModelsSelected: (models: string[]) => void
-        existingModelsOverride: string[]
-      }
-    | {
-        onModelsSelected?: undefined
-        existingModelsOverride?: undefined
-      }
-  )
 
 export function FetchModelsDialog({
   open,

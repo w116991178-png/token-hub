@@ -460,20 +460,17 @@ func GetAffCode(c *gin.Context) {
 		common.ApiError(c, err)
 		return
 	}
-	if user.AffCode == "" {
-		user.AffCode = common.GetRandomString(4)
-		if err := user.Update(false); err != nil {
-			c.JSON(http.StatusOK, gin.H{
-				"success": false,
-				"message": err.Error(),
-			})
-			return
-		}
+	subdomain := ""
+	if user.AffSubdomain != nil {
+		subdomain = *user.AffSubdomain
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "",
-		"data":    user.AffCode,
+		"data": gin.H{
+			"enabled":   user.AffEnabled,
+			"subdomain": subdomain,
+		},
 	})
 	return
 }
@@ -663,8 +660,18 @@ func GetUserModels(c *gin.Context) {
 }
 
 func UpdateUser(c *gin.Context) {
+	var requestData map[string]interface{}
+	if err := common.DecodeJson(c.Request.Body, &requestData); err != nil {
+		common.ApiErrorI18n(c, i18n.MsgInvalidParams)
+		return
+	}
+	requestBytes, err := common.Marshal(requestData)
+	if err != nil {
+		common.ApiErrorI18n(c, i18n.MsgInvalidParams)
+		return
+	}
 	var updatedUser model.User
-	err := common.DecodeJson(c.Request.Body, &updatedUser)
+	err = common.Unmarshal(requestBytes, &updatedUser)
 	if err != nil || updatedUser.Id == 0 {
 		common.ApiErrorI18n(c, i18n.MsgInvalidParams)
 		return
@@ -701,14 +708,28 @@ func UpdateUser(c *gin.Context) {
 	}
 	updatePassword := updatedUser.Password != ""
 	authzTouched := false
+	_, affiliateSettingsIncluded := requestData["aff_enabled"]
+	affiliateEnabled := updatedUser.AffEnabled
+	affiliateSubdomain := ""
+	if updatedUser.AffSubdomain != nil {
+		affiliateSubdomain = *updatedUser.AffSubdomain
+	}
 	if err := model.DB.Transaction(func(tx *gorm.DB) error {
 		if err := updatedUser.EditWithTx(tx, updatePassword); err != nil {
 			return err
+		}
+		if affiliateSettingsIncluded {
+			if err := model.UpdateUserAffiliateSettingsWithTx(tx, updatedUser.Id, affiliateEnabled, affiliateSubdomain); err != nil {
+				return err
+			}
 		}
 		touched, err := updateAdminPermissionsForUserInTx(c, tx, updatedUser.Id, originUser.Role, updatedUser.AdminPermissions)
 		authzTouched = touched
 		return err
 	}); err != nil {
+		if respondAffiliateSettingsError(c, err) {
+			return
+		}
 		common.ApiError(c, err)
 		return
 	}
@@ -1026,9 +1047,21 @@ func CreateUser(c *gin.Context) {
 		Password:    user.Password,
 		DisplayName: user.DisplayName,
 		Role:        user.Role, // 保持管理员设置的角色
+		AffEnabled:  user.AffEnabled,
 	}
 	authzTouched := false
 	if err := model.DB.Transaction(func(tx *gorm.DB) error {
+		if user.AffEnabled {
+			subdomain := ""
+			if user.AffSubdomain != nil {
+				subdomain = *user.AffSubdomain
+			}
+			normalized, err := model.ValidateAffiliateSubdomainAvailable(tx, subdomain, 0)
+			if err != nil {
+				return err
+			}
+			cleanUser.AffSubdomain = &normalized
+		}
 		if err := cleanUser.InsertWithTx(tx, 0); err != nil {
 			return err
 		}
@@ -1036,6 +1069,9 @@ func CreateUser(c *gin.Context) {
 		authzTouched = touched
 		return err
 	}); err != nil {
+		if respondAffiliateSettingsError(c, err) {
+			return
+		}
 		common.ApiError(c, err)
 		return
 	}
@@ -1056,6 +1092,24 @@ func CreateUser(c *gin.Context) {
 		"message": "",
 	})
 	return
+}
+
+func respondAffiliateSettingsError(c *gin.Context, err error) bool {
+	var messageKey string
+	switch {
+	case errors.Is(err, model.ErrAffiliateSubdomainRequired):
+		messageKey = i18n.MsgUserAffiliateSubdomainRequired
+	case errors.Is(err, model.ErrAffiliateSubdomainInvalid):
+		messageKey = i18n.MsgUserAffiliateSubdomainInvalid
+	case errors.Is(err, model.ErrAffiliateSubdomainReserved):
+		messageKey = i18n.MsgUserAffiliateSubdomainReserved
+	case errors.Is(err, model.ErrAffiliateSubdomainInUse):
+		messageKey = i18n.MsgUserAffiliateSubdomainInUse
+	default:
+		return false
+	}
+	common.ApiErrorI18n(c, messageKey)
+	return true
 }
 
 func updateAdminPermissionsForUserInTx(c *gin.Context, tx *gorm.DB, userID int, userRole int, permissions map[string]map[string]bool) (bool, error) {

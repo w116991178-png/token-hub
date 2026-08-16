@@ -16,73 +16,91 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { Settings, Zap, BarChart3 } from 'lucide-react'
+import { ArrowDown, Check } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
-import { AnimateInView } from '@/components/animate-in-view'
+import { TOKEN_HUB_BRAND } from '../../config'
 
 export function HowItWorks() {
   const { t } = useTranslation()
-
   const steps = [
     {
-      num: '1',
-      title: t('Configure'),
-      desc: t(
-        'Add your API keys, set up channels and configure access permissions'
+      number: '01',
+      title: t('Create one key'),
+      description: t(
+        'Set a budget, choose permissions, and issue a credential for your app or team.'
       ),
-      icon: <Settings className='size-6' strokeWidth={1.5} />,
+      code: 'sk-th_live_••••••••',
     },
     {
-      num: '2',
-      title: t('Connect'),
-      desc: t(
-        'Connect through OpenAI, Claude, Gemini, and other compatible API routes'
+      number: '02',
+      title: t('Change one endpoint'),
+      description: t(
+        'Keep your existing SDK and point its base URL to the Token Hub gateway.'
       ),
-      icon: <Zap className='size-6' strokeWidth={1.5} />,
+      code: TOKEN_HUB_BRAND.apiBase,
     },
     {
-      num: '3',
-      title: t('Monitor'),
-      desc: t('Track usage, costs and performance with real-time analytics'),
-      icon: <BarChart3 className='size-6' strokeWidth={1.5} />,
+      number: '03',
+      title: t('Ship with visibility'),
+      description: t(
+        'Route traffic, watch spend, and tune provider performance from the dashboard.'
+      ),
+      code: 'status: ready',
     },
   ]
 
   return (
-    <section className='border-border/40 relative z-10 border-t px-6 py-24 md:py-32'>
-      <div className='mx-auto max-w-6xl'>
-        <AnimateInView className='mb-16 text-center md:mb-20'>
-          <p className='text-muted-foreground mb-3 text-xs font-medium tracking-widest uppercase'>
-            {t('How It Works')}
-          </p>
-          <h2 className='text-2xl font-bold tracking-tight md:text-3xl'>
-            {t('Three steps to get started')}
-          </h2>
-        </AnimateInView>
+    <section className='border-y border-[#24221f]/15 bg-[#ebe5d9] px-4 py-20 md:px-8 md:py-32 dark:border-white/15 dark:bg-white/[0.035]'>
+      <div className='mx-auto max-w-[86rem]'>
+        <div className='grid gap-10 lg:grid-cols-[0.72fr_1.28fr]'>
+          <div className='lg:sticky lg:top-32 lg:self-start'>
+            <p className='text-[10px] font-black tracking-[0.2em] text-[#ff6b4a] uppercase'>
+              02 / {t('Quick start')}
+            </p>
+            <h2 className='mt-5 max-w-xl text-[clamp(2.5rem,5vw,5rem)] leading-[0.94] font-black tracking-[-0.065em] text-[#24221f] dark:text-[#f4f0e8]'>
+              {t('Three moves.')}
+              <br />
+              {t('Then ship.')}
+            </h2>
+            <p className='mt-6 max-w-md text-sm leading-6 font-medium text-[#24221f]/60 dark:text-white/55'>
+              {t(
+                'No proprietary SDK. No provider-by-provider rewrite. Your current OpenAI-compatible client is enough.'
+              )}
+            </p>
+            <ArrowDown className='mt-10 hidden size-8 text-[#ff6b4a] lg:block' />
+          </div>
 
-        <div className='grid gap-8 md:grid-cols-3 md:gap-12'>
-          {steps.map((step, i) => (
-            <AnimateInView
-              key={step.num}
-              delay={i * 150}
-              animation='fade-up'
-              className='relative flex flex-col items-center text-center'
-            >
-              <div className='relative mb-6'>
-                <div className='text-muted-foreground border-border/50 bg-muted/30 flex size-16 items-center justify-center rounded-2xl border transition-colors'>
-                  {step.icon}
+          <ol className='border-t border-[#24221f]/20 dark:border-white/15'>
+            {steps.map((step) => (
+              <li
+                key={step.number}
+                className='grid gap-6 border-b border-[#24221f]/20 py-9 sm:grid-cols-[4rem_1fr] sm:py-12 dark:border-white/15'
+              >
+                <span className='font-mono text-sm font-black text-[#ff6b4a]'>
+                  {step.number}
+                </span>
+                <div>
+                  <div className='flex items-start gap-4'>
+                    <span className='mt-1 flex size-6 shrink-0 items-center justify-center rounded-full bg-[#24221f] text-[#d9ff52] dark:bg-[#f4f0e8] dark:text-[#171714]'>
+                      <Check className='size-3.5' strokeWidth={3} />
+                    </span>
+                    <div>
+                      <h3 className='text-2xl font-black tracking-[-0.045em] text-[#24221f] sm:text-3xl dark:text-[#f4f0e8]'>
+                        {step.title}
+                      </h3>
+                      <p className='mt-3 max-w-xl text-sm leading-6 font-medium text-[#24221f]/60 dark:text-white/55'>
+                        {step.description}
+                      </p>
+                    </div>
+                  </div>
+                  <code className='mt-6 block overflow-x-auto rounded-xl border border-[#24221f]/15 bg-[#f4f0e8] px-4 py-3 text-xs font-bold text-[#24221f] dark:border-white/10 dark:bg-[#171714] dark:text-[#d9ff52]'>
+                    {step.code}
+                  </code>
                 </div>
-                <div className='bg-foreground text-background absolute -top-2 -right-2 flex size-6 items-center justify-center rounded-full text-xs font-bold'>
-                  {step.num}
-                </div>
-              </div>
-              <h3 className='mb-2 text-base font-semibold'>{step.title}</h3>
-              <p className='text-muted-foreground max-w-[240px] text-sm leading-relaxed'>
-                {step.desc}
-              </p>
-            </AnimateInView>
-          ))}
+              </li>
+            ))}
+          </ol>
         </div>
       </div>
     </section>

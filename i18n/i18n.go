@@ -203,10 +203,8 @@ func normalizeLang(lang string) string {
 
 	// Handle common variations
 	switch {
-	case strings.HasPrefix(lang, "zh-tw"):
-		return LangZhTW
 	case strings.HasPrefix(lang, "zh"):
-		return LangZhCN
+		return LangZhTW
 	case strings.HasPrefix(lang, "en"):
 		return LangEn
 	default:
@@ -216,7 +214,7 @@ func normalizeLang(lang string) string {
 
 // SupportedLanguages returns a list of supported language codes
 func SupportedLanguages() []string {
-	return []string{LangZhCN, LangZhTW, LangEn}
+	return []string{LangZhTW, LangEn}
 }
 
 // IsSupported checks if a language code is supported

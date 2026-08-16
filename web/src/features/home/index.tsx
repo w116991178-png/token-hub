@@ -20,13 +20,21 @@ import { useCallback, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { PublicLayout } from '@/components/layout'
-import { Footer } from '@/components/layout/components/footer'
 import { RichContent } from '@/components/rich-content'
 import { useTheme } from '@/context/theme-provider'
 import { isLikelyHtml } from '@/lib/content-format'
 import { useAuthStore } from '@/stores/auth-store'
 
-import { CTA, Features, Hero, HowItWorks, Stats } from './components'
+import {
+  BrandMark,
+  CTA,
+  Features,
+  Hero,
+  HowItWorks,
+  Stats,
+  TokenHubFooter,
+} from './components'
+import { TOKEN_HUB_BRAND } from './config'
 import { useHomePageContent } from './hooks'
 
 export function Home() {
@@ -121,13 +129,20 @@ export function Home() {
   }
 
   return (
-    <PublicLayout showMainContainer={false}>
-      <Hero isAuthenticated={isAuthenticated} />
-      <Stats />
-      <Features />
-      <HowItWorks />
-      <CTA isAuthenticated={isAuthenticated} />
-      <Footer />
+    <PublicLayout
+      showMainContainer={false}
+      siteName={TOKEN_HUB_BRAND.name}
+      logo={<BrandMark />}
+      headerProps={{ variant: 'token-hub' }}
+    >
+      <div className='token-hub-landing bg-[#f4f0e8] text-[#24221f] dark:bg-[#171714] dark:text-[#f4f0e8]'>
+        <Hero isAuthenticated={isAuthenticated} />
+        <Stats />
+        <Features />
+        <HowItWorks />
+        <CTA isAuthenticated={isAuthenticated} />
+        <TokenHubFooter />
+      </div>
     </PublicLayout>
   )
 }

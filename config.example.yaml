@@ -1,0 +1,90 @@
+# token-hub startup configuration.
+# Copy this file to /etc/token-hub/config.yaml and restrict it to the service user:
+#   chown token-hub:token-hub /etc/token-hub/config.yaml
+#   chmod 600 /etc/token-hub/config.yaml
+# Values in this file take precedence. Environment variables and .env are only
+# used when the matching value is absent here.
+
+site:
+  system_name: token-hub
+  server_address: https://token-hub.io
+
+server:
+  port: 3000
+  mode: release
+  log_dir: /var/lib/token-hub/logs
+  timezone: UTC
+  node_name: token-hub-main
+  node_type: master
+  shutdown_timeout_seconds: 120
+  # Only needed for a no-embed frontend build.
+  # frontend_base_url: https://token-hub.io
+
+database:
+  # PostgreSQL example. URL-encode reserved characters in the password.
+  dsn: postgresql://token_hub:CHANGE_ME@127.0.0.1:5432/token_hub?sslmode=disable
+  # Leave log_dsn unset to store logs in the primary database.
+  # log_dsn: postgresql://token_hub:CHANGE_ME@127.0.0.1:5432/token_hub_logs?sslmode=disable
+  # Used only when dsn is omitted.
+  sqlite_path: /var/lib/token-hub/data/token-hub.db
+  max_idle_connections: 100
+  max_open_connections: 1000
+  max_lifetime_seconds: 60
+  slow_query_threshold_ms: 200
+
+redis:
+  connection_string: redis://127.0.0.1:6379/0
+  pool_size: 10
+  sync_frequency: 60
+  memory_cache_enabled: true
+
+security:
+  # Generate independently, for example: openssl rand -hex 32
+  session_secret: CHANGE_TO_A_RANDOM_64_HEX_VALUE
+  crypto_secret: CHANGE_TO_ANOTHER_RANDOM_64_HEX_VALUE
+  session_cookie_secure: true
+  # Exact HTTPS origins only. Add each agent subdomain that exposes login.
+  session_trusted_origins:
+    - https://token-hub.io
+    # - https://ab.token-hub.io
+  # Nginx runs on the same host in the native deployment.
+  trusted_proxies:
+    - 127.0.0.1
+    - ::1
+  tls_insecure_skip_verify: false
+
+runtime:
+  debug_enabled: false
+  batch_update_enabled: true
+  batch_update_interval: 5
+  channel_update_frequency: 30
+  relay_timeout: 0
+  relay_idle_connection_timeout: 90
+  streaming_timeout: 300
+  update_task: true
+  error_log_enabled: true
+  enable_pprof: false
+
+analytics:
+  # umami_website_id: ""
+  # umami_script_url: https://analytics.example.com/script.js
+  # google_analytics_id: ""
+
+# Every legacy environment setting has a configuration-file equivalent here.
+# Use the existing setting name and a scalar or list value. Structured settings
+# above win if the same name appears in both places.
+parameters:
+  GENERATE_DEFAULT_TOKEN: false
+  GLOBAL_API_RATE_LIMIT_ENABLE: true
+  GLOBAL_API_RATE_LIMIT: 360
+  GLOBAL_API_RATE_LIMIT_DURATION: 180
+  GLOBAL_WEB_RATE_LIMIT_ENABLE: true
+  GLOBAL_WEB_RATE_LIMIT: 120
+  GLOBAL_WEB_RATE_LIMIT_DURATION: 180
+  TRUSTED_REDIRECT_DOMAINS:
+    - token-hub.io
+
+# Optional database-backed application settings can also be pinned by this file.
+# These values are runtime overrides and are not written into the database.
+options:
+  RegisterEnabled: true

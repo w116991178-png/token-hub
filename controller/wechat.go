@@ -156,13 +156,21 @@ func WeChatBind(c *gin.Context) {
 		})
 		return
 	}
-	userId := c.GetInt("id")
-	if userId == 0 {
+	user := model.User{
+		Id: c.GetInt("id"),
+	}
+	if user.Id == 0 {
 		c.JSON(http.StatusUnauthorized, gin.H{"success": false, "message": "未登录"})
 		return
 	}
-	// 只更新绑定列，避免完整用户快照覆盖并发的封禁、降权或分组变更。
-	if err := model.UpdateUserBindColumn(userId, "wechat_id", wechatId); err != nil {
+	err = user.FillUserById()
+	if err != nil {
+		common.ApiError(c, err)
+		return
+	}
+	user.WeChatId = wechatId
+	err = user.Update(false)
+	if err != nil {
 		common.ApiError(c, err)
 		return
 	}

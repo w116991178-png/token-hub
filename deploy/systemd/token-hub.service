@@ -1,0 +1,24 @@
+[Unit]
+Description=token-hub API gateway
+After=network-online.target postgresql.service redis-server.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=token-hub
+Group=token-hub
+WorkingDirectory=/opt/token-hub
+ExecStart=/opt/token-hub/token-hub --config /etc/token-hub/config.yaml
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=150
+LimitNOFILE=1048576
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/token-hub
+
+[Install]
+WantedBy=multi-user.target

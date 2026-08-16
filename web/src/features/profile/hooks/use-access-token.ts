@@ -58,14 +58,9 @@ export function useAccessToken() {
     }
   }, [copyToClipboard])
 
-  const clearToken = useCallback(() => {
-    setToken('')
-  }, [])
-
   return {
     token,
     generating,
     generate,
-    clearToken,
   }
 }

@@ -226,9 +226,19 @@ export function useUsersColumns(): ColumnDef<User>[] {
         const affCount = user.aff_count || 0
         const affHistoryQuota = user.aff_history_quota || 0
         const inviterId = user.inviter_id || 0
+        const affiliateEnabled = user.aff_enabled === true
 
         return (
           <div className='flex max-w-full min-w-0 flex-wrap items-center gap-1 overflow-hidden'>
+            <StatusBadge
+              label={
+                affiliateEnabled
+                  ? `${t('Agent')}: ${user.aff_subdomain}`
+                  : t('Agent Disabled')
+              }
+              variant={affiliateEnabled ? 'success' : 'neutral'}
+              copyable={false}
+            />
             <Tooltip>
               <TooltipTrigger
                 render={

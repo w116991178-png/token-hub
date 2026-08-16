@@ -207,7 +207,7 @@ function Sidebar({
           data-sidebar='sidebar'
           data-slot='sidebar'
           data-mobile='true'
-          className='bg-sidebar text-sidebar-foreground pointer-events-auto z-60 w-(--sidebar-width) p-0 [&>button]:hidden'
+          className='bg-sidebar text-sidebar-foreground w-(--sidebar-width) p-0 [&>button]:hidden'
           style={
             {
               '--sidebar-width': SIDEBAR_WIDTH_MOBILE,
@@ -530,7 +530,6 @@ function SidebarMenuButton({
     tooltip?: string | React.ComponentProps<typeof TooltipContent>
   } & VariantProps<typeof sidebarMenuButtonVariants>) {
   const { isMobile, state } = useSidebar()
-  const tooltipEnabled = Boolean(tooltip) && !isMobile && state === 'collapsed'
   const comp = useRender({
     defaultTagName: 'button',
     props: mergeProps<'button'>(
@@ -539,7 +538,7 @@ function SidebarMenuButton({
       },
       props
     ),
-    render: tooltipEnabled ? <TooltipTrigger render={render} /> : render,
+    render: !tooltip ? render : <TooltipTrigger render={render} />,
     state: {
       slot: 'sidebar-menu-button',
       sidebar: 'menu-button',
@@ -548,7 +547,7 @@ function SidebarMenuButton({
     },
   })
 
-  if (!tooltipEnabled || !tooltip) {
+  if (!tooltip) {
     return comp
   }
 
@@ -562,7 +561,12 @@ function SidebarMenuButton({
     <TooltipProvider delay={0}>
       <Tooltip>
         {comp}
-        <TooltipContent side='right' align='center' {...tooltip} />
+        <TooltipContent
+          side='right'
+          align='center'
+          hidden={state !== 'collapsed' || isMobile}
+          {...tooltip}
+        />
       </Tooltip>
     </TooltipProvider>
   )

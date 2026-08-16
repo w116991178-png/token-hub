@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"net/url"
-	"os"
 	"strings"
 	"sync"
 	"time"
@@ -125,7 +124,7 @@ func normalizeClickHouseDSN(dsn string) string {
 }
 
 func chooseDB(envName string, isLog bool) (*gorm.DB, common.DatabaseType, error) {
-	dsn := os.Getenv(envName)
+	dsn := common.GetConfigOrEnv(envName)
 	if dsn != "" {
 		if isClickHouseDSN(dsn) {
 			if !isLog {
@@ -172,7 +171,7 @@ func InitDB() (err error) {
 	db, dbType, err := chooseDB("SQL_DSN", false)
 	if err == nil {
 		common.SetMainDatabaseType(dbType)
-		if os.Getenv("LOG_SQL_DSN") == "" {
+		if common.GetConfigOrEnv("LOG_SQL_DSN") == "" {
 			common.SetLogDatabaseType(dbType)
 		}
 		initCol()
@@ -210,7 +209,7 @@ func InitDB() (err error) {
 }
 
 func InitLogDB() (err error) {
-	if os.Getenv("LOG_SQL_DSN") == "" {
+	if common.GetConfigOrEnv("LOG_SQL_DSN") == "" {
 		LOG_DB = DB
 		common.SetLogDatabaseType(common.MainDatabaseType())
 		initCol()

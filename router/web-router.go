@@ -1,7 +1,7 @@
 package router
 
 import (
-	"embed"
+	"io/fs"
 	"net/http"
 	"strings"
 
@@ -13,9 +13,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// WebAssets holds the embedded dashboard frontend assets.
+// WebAssets holds the dashboard frontend assets.
+// In separated deployment (-tags noembed) BuildFS is nil.
 type WebAssets struct {
-	BuildFS   embed.FS
+	BuildFS   fs.FS
 	IndexPage []byte
 }
 

@@ -30,6 +30,7 @@ import { useEffect } from 'react'
 import { NavigationProgress } from '@/components/navigation-progress'
 import { Toaster } from '@/components/ui/sonner'
 import { ThemeCustomizationProvider } from '@/context/theme-customization-provider'
+import { getReferralSubdomain } from '@/features/auth/lib/referral-host'
 import { saveAffiliateCode } from '@/features/auth/lib/storage'
 import { GeneralError } from '@/features/errors/general-error'
 import { NotFoundError } from '@/features/errors/not-found-error'
@@ -52,9 +53,9 @@ function RootComponent() {
   useSystemConfig({ autoLoad: true })
 
   useEffect(() => {
-    const aff = new URLSearchParams(window.location.search).get('aff')?.trim()
-    if (aff) {
-      saveAffiliateCode(aff)
+    const referralSubdomain = getReferralSubdomain(window.location.hostname)
+    if (referralSubdomain) {
+      saveAffiliateCode(referralSubdomain)
     }
   }, [])
 

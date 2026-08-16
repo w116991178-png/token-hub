@@ -17,11 +17,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import i18next from 'i18next'
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 
 import { useIsAdmin } from '@/hooks/use-admin'
-import { useDebounce } from '@/hooks/use-debounce'
 
 import {
   getUserBillingHistory,
@@ -51,8 +50,6 @@ export function useBillingHistory(options: UseBillingHistoryOptions = {}) {
   const [page, setPage] = useState(initialPage)
   const [pageSize, setPageSize] = useState(initialPageSize)
   const [keyword, setKeyword] = useState('')
-  const debouncedKeyword = useDebounce(keyword)
-  const requestIdRef = useRef(0)
   const [loading, setLoading] = useState(false)
   const [completing, setCompleting] = useState(false)
 
@@ -60,14 +57,11 @@ export function useBillingHistory(options: UseBillingHistoryOptions = {}) {
    * Fetch billing history
    */
   const fetchBillingHistory = useCallback(async () => {
-    const requestId = ++requestIdRef.current
     setLoading(true)
     try {
       const response = isAdmin
-        ? await getAllBillingHistory(page, pageSize, debouncedKeyword)
-        : await getUserBillingHistory(page, pageSize, debouncedKeyword)
-
-      if (requestId !== requestIdRef.current) return
+        ? await getAllBillingHistory(page, pageSize, keyword)
+        : await getUserBillingHistory(page, pageSize, keyword)
 
       if (isApiSuccess(response) && response.data) {
         setRecords(response.data.items || [])
@@ -80,19 +74,15 @@ export function useBillingHistory(options: UseBillingHistoryOptions = {}) {
         setTotal(0)
       }
     } catch (error) {
-      if (requestId !== requestIdRef.current) return
-
       // eslint-disable-next-line no-console
       console.error('Failed to fetch billing history:', error)
       toast.error(i18next.t('Failed to load billing history'))
       setRecords([])
       setTotal(0)
     } finally {
-      if (requestId === requestIdRef.current) {
-        setLoading(false)
-      }
+      setLoading(false)
     }
-  }, [debouncedKeyword, isAdmin, page, pageSize])
+  }, [isAdmin, page, pageSize, keyword])
 
   /**
    * Complete a pending order (admin only)
@@ -147,17 +137,14 @@ export function useBillingHistory(options: UseBillingHistoryOptions = {}) {
    * Search by keyword
    */
   const handleSearch = useCallback((newKeyword: string) => {
-    requestIdRef.current += 1
     setKeyword(newKeyword)
     setPage(1) // Reset to first page when searching
   }, [])
 
-  // Fetch data after the search draft has settled.
+  // Fetch data when dependencies change
   useEffect(() => {
-    if (keyword !== debouncedKeyword) return
-
     fetchBillingHistory()
-  }, [debouncedKeyword, fetchBillingHistory, keyword])
+  }, [fetchBillingHistory])
 
   return {
     records,

@@ -6,6 +6,8 @@
 
 🍥 **次世代大規模モデルゲートウェイとAI資産管理システム**
 
+🌐 **公式サイト：[token-hub.io](https://token-hub.io)**
+
 <p align="center">
   <a href="./README.zh_CN.md">简体中文</a> |
   <a href="./README.zh_TW.md">繁體中文</a> |
