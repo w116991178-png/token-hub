@@ -1,3 +1,15 @@
+# Token Hub
+
+Token Hub est une passerelle API d'IA multi-fournisseurs, pilotée en priorité par des fichiers de configuration, pour l'accès unifié, la gestion des comptes, la comptabilisation de l'utilisation et les opérations d'affiliation par sous-domaine.
+
+- Site officiel : [token-hub.io](https://token-hub.io)
+- Code source : [github.com/w116991178-png/token-hub](https://github.com/w116991178-png/token-hub)
+- Attribution en amont : Token Hub est basé sur le projet open source [New API](https://github.com/QuantumNous/new-api).
+
+---
+
+## Ressources du projet New API en amont
+
 <div align="center">
 
 ![new-api](/web/public/logo.png)
@@ -265,6 +277,7 @@ docker run --name new-api -d --restart always \
 
 | Type de modèle | Description | Documentation |
 |---------|------|------|
+| ⭐ Token Hub | Passerelle d'IA multi-fournisseurs sur [token-hub.io](https://token-hub.io) | [Dépôt du projet](https://github.com/w116991178-png/token-hub) |
 | 🤖 OpenAI-Compatible | Modèles compatibles OpenAI | [Documentation](https://docs.newapi.pro/en/docs/api/ai-model/chat/openai/createchatcompletion) |
 | 🤖 OpenAI Responses | Format OpenAI Responses | [Documentation](https://docs.newapi.pro/en/docs/api/ai-model/chat/openai/createresponse) |
 | 🎨 Midjourney-Proxy | [Midjourney-Proxy(Plus)](https://github.com/novicezk/midjourney-proxy) | [Documentation](https://doc.newapi.pro/api/midjourney-proxy-image) |

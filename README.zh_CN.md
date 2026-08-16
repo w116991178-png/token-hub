@@ -1,3 +1,15 @@
+# Token Hub
+
+Token Hub 是以配置文件为主的多供应商 AI API 网关，提供统一模型接入、账户管理、用量核算及基于二级域名的代理运营能力。
+
+- 官方网站：[token-hub.io](https://token-hub.io)
+- 源代码：[github.com/w116991178-png/token-hub](https://github.com/w116991178-png/token-hub)
+- 上游来源：Token Hub 基于开源 [New API 项目](https://github.com/QuantumNous/new-api)开发。
+
+---
+
+## New API 上游项目资料
+
 <div align="center">
 
 ![new-api](/web/public/logo.png)
@@ -265,6 +277,7 @@ docker run --name new-api -d --restart always \
 
 | 模型类型 | 说明 | 文档 |
 |---------|------|------|
+| ⭐ Token Hub | [token-hub.io](https://token-hub.io) 多供应商统一 AI 网关 | [项目仓库](https://github.com/w116991178-png/token-hub) |
 | 🤖 OpenAI-Compatible | OpenAI 兼容模型 | [文档](https://docs.newapi.pro/zh/docs/api/ai-model/chat/openai/createchatcompletion) |
 | 🤖 OpenAI Responses | OpenAI Responses 格式 | [文档](https://docs.newapi.pro/zh/docs/api/ai-model/chat/openai/createresponse) |
 | 🎨 Midjourney-Proxy | [Midjourney-Proxy(Plus)](https://github.com/novicezk/midjourney-proxy) | [文档](https://doc.newapi.pro/api/midjourney-proxy-image) |

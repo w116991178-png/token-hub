@@ -1,3 +1,15 @@
+# Token Hub
+
+Token Hub is a configuration-first, multi-provider AI API gateway for unified access, account management, usage accounting, and subdomain-based affiliate operations.
+
+- Website: [token-hub.io](https://token-hub.io)
+- Source code: [github.com/w116991178-png/token-hub](https://github.com/w116991178-png/token-hub)
+- Upstream attribution: Token Hub is based on the open-source [New API project](https://github.com/QuantumNous/new-api).
+
+---
+
+## Upstream New API project materials
+
 <div align="center">
 
 ![new-api](/web/public/logo.png)
@@ -265,6 +277,7 @@ docker run --name new-api -d --restart always \
 
 | Model Type | Description | Documentation |
 |---------|------|------|
+| ⭐ Token Hub | Unified multi-provider AI gateway at [token-hub.io](https://token-hub.io) | [Project repository](https://github.com/w116991178-png/token-hub) |
 | 🤖 OpenAI GPTs | gpt-4-gizmo-* series | - |
 | 🎨 Midjourney-Proxy | [Midjourney-Proxy(Plus)](https://github.com/novicezk/midjourney-proxy) | [Documentation](https://doc.newapi.pro/en/api/midjourney-proxy-image) |
 | 🎵 Suno-API | [Suno API](https://github.com/Suno-API/Suno-API) | [Documentation](https://doc.newapi.pro/en/api/suno-music) |

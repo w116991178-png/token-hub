@@ -1,3 +1,15 @@
+# Token Hub
+
+Token Hub は、統合アクセス、アカウント管理、利用量計算、サブドメインベースの代理運用を提供する、設定ファイル優先のマルチプロバイダー AI API ゲートウェイです。
+
+- 公式サイト：[token-hub.io](https://token-hub.io)
+- ソースコード：[github.com/w116991178-png/token-hub](https://github.com/w116991178-png/token-hub)
+- アップストリーム表記：Token Hub はオープンソースの [New API プロジェクト](https://github.com/QuantumNous/new-api)を基盤としています。
+
+---
+
+## アップストリーム New API プロジェクト資料
+
 <div align="center">
 
 ![new-api](/web/public/logo.png)
@@ -267,6 +279,7 @@ docker run --name new-api -d --restart always \
 
 | モデルタイプ | 説明 | ドキュメント |
 |---------|------|------|
+| ⭐ Token Hub | [token-hub.io](https://token-hub.io) のマルチプロバイダー統合 AI ゲートウェイ | [プロジェクトリポジトリ](https://github.com/w116991178-png/token-hub) |
 | 🤖 OpenAI-Compatible | OpenAI互換モデル | [ドキュメント](https://docs.newapi.pro/ja/docs/api/ai-model/chat/openai/createchatcompletion) |
 | 🤖 OpenAI Responses | OpenAI Responsesフォーマット | [ドキュメント](https://docs.newapi.pro/ja/docs/api/ai-model/chat/openai/createresponse) |
 | 🎨 Midjourney-Proxy | [Midjourney-Proxy(Plus)](https://github.com/novicezk/midjourney-proxy) | [ドキュメント](https://doc.newapi.pro/api/midjourney-proxy-image) |
